@@ -203,6 +203,11 @@ const routeActionTypes = keymirror({
   ROUTE_ERROR: null
 });
 
+const routerActionTypes = keymirror({
+  // Action to trigger a navigation
+  ROUTER_NAVIGATE: null
+});
+
 const domainActionTypes = keymirror({
   DOMAIN_FETCH: null,
   DOMAIN_RECEIVED: null
@@ -224,6 +229,7 @@ export {
   orgActionTypes,
   quotaActionTypes,
   routeActionTypes,
+  routerActionTypes,
   spaceActionTypes,
   serviceActionTypes,
   userActionTypes

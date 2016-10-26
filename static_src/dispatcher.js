@@ -41,6 +41,14 @@ class AppDispatcher extends Dispatcher {
     logAction(action);
     trackAction(action);
   }
+
+  // Actions come from the router
+  handleRouterAction(srcAction) {
+    const action = addSourceType(srcAction, 'ROUTER_ACTION');
+    this.dispatch(action);
+    logAction(action);
+    trackAction(action);
+  }
 }
 
 const _AppDispatcher = new AppDispatcher();

@@ -5,3 +5,7 @@
 .main_content {
   max-width: 1400px;
 }
+
+.sidenav {
+  display: none;
+}

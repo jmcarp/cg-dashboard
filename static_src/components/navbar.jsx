@@ -5,14 +5,18 @@ import React from 'react';
 import createStyler from '../util/create_styler';
 import spaceActions from '../actions/space_actions.js';
 import orgActions from '../actions/org_actions.js';
+import AppStore from '../stores/app_store.js';
 import OrgStore from '../stores/org_store.js';
 import SpaceStore from '../stores/space_store.js';
+import { router } from '../main.js';
 
 function stateSetter() {
+  const currentAppGuid = AppStore.currentAppGuid;
   const currentOrgGuid = OrgStore.currentOrgGuid;
   const currentSpaceGuid = SpaceStore.currentSpaceGuid;
 
   return {
+    currentApp: AppStore.get(currentAppGuid),
     currentOrg: OrgStore.get(currentOrgGuid),
     currentSpace: SpaceStore.get(currentSpaceGuid),
     orgs: OrgStore.getAll()
@@ -27,6 +31,9 @@ export class Nav extends React.Component {
     this.styler = createStyler(style);
     this._onChange = this._onChange.bind(this);
     this._handleOverviewClick = this._handleOverviewClick.bind(this);
+    this._handleOrgSelect = this._handleOrgSelect.bind(this);
+    this._handleSpaceSelect = this._handleSpaceSelect.bind(this);
+    this._handleAppSelect = this._handleAppSelect.bind(this);
   }
 
   componentDidMount() {
@@ -57,6 +64,24 @@ export class Nav extends React.Component {
     orgActions.toggleSpaceMenu(orgGuid);
   }
 
+  _handleOrgSelect(e) {
+    const orgGuid = e.target.value;
+    router.setRoute(`/org/${orgGuid}`);
+  }
+
+  _handleSpaceSelect(e) {
+    const orgGuid = this.state.currentOrg.guid;
+    const spaceGuid = e.target.value;
+    router.setRoute(`/org/${orgGuid}/spaces/${spaceGuid}`);
+  }
+
+  _handleAppSelect(e) {
+    const orgGuid = this.state.currentOrg.guid;
+    const spaceGuid = this.state.currentSpace.guid;
+    const appGuid = e.target.value;
+    router.setRoute(`/org/${orgGuid}/spaces/${spaceGuid}/apps/${appGuid}`);
+  }
+
   // currently displays the space listing
   orgHref(org) {
     return `/#/org/${org.guid}`;
@@ -74,75 +99,76 @@ export class Nav extends React.Component {
     return this.orgSubHref(org, `/spaces/${spaceGuid}`);
   }
 
+  isCurrentApp(appGuid) {
+    const currentApp = this.state.currentApp;
+    return currentApp && currentApp.guid === appGuid;
+  }
+
+  isCurrentOrg(orgGuid) {
+    const currentOrg = this.state.currentOrg;
+    return currentOrg && currentOrg.guid === orgGuid;
+  }
+
   isCurrentSpace(spaceGuid) {
-    if (!this.state.currentSpace) return false;
-    if (this.state.currentSpace.guid === spaceGuid) return true;
-    return false;
+    const currentSpace = this.state.currentSpace;
+    return currentSpace && currentSpace.guid === spaceGuid;
   }
 
   render() {
-    const mainList = this.styler('usa-sidenav-list', 'sidenav-list', 'sidenav-level-one');
-    const secondList = this.styler('usa-sidenav-sub_list', 'sidenav-list', 'sidenav-level-two');
-    const thirdList = this.styler('sidenav-list', 'sidenav-level-three');
-    const downArrow = this.styler('menu-arrow', 'sidenav-arrow', 'sidenav-arrow-down');
-    const rightArrow = this.styler('menu-arrow', 'sidenav-arrow', 'sidenav-arrow-right');
-    const header = this.styler('sidenav-header');
-    const sortedOrgs = this.state.orgs.sort((a, b) => a.name < b.name ? -1 : 1);
+    if (!this.state.currentOrg) {
+      return null;
+    }
+
+    const sortedOrgs = this.state.orgs.sort((a, b) => a.name.localeCompare(b.name));
+
+    function templateOptions(items, selected) {
+      return items.map(item => {
+        const isSelected = item.guid === selected;
+        return <option value={ item.guid } selected={ isSelected }>{ item.name }</option>;
+      });
+    }
+
+    let orgSelect = (
+      <select
+        className={ this.styler('nav-breadcrumb-select', 'nav-breadcrumb-select-org') }
+        onChange={ this._handleOrgSelect }
+      >
+        { templateOptions(sortedOrgs, this.state.currentOrg.guid) }
+      </select>
+    );
+
+    let spaceSelect = null;
+    if (!!this.state.currentSpace) {
+      const sortedSpaces =
+        this.state.currentOrg.spaces.sort((a, b) => a.name.localeCompare(b.name));
+      spaceSelect = (
+        <select
+          className={ this.styler('nav-breadcrumb-select', 'nav-breadcrumb-select-space') }
+          onChange={ this._handleSpaceSelect }
+        >
+          { templateOptions(sortedSpaces, this.state.currentSpace.guid) }
+         </select>
+      );
+    }
+
+    let appSelect = null;
+    if (!!this.state.currentApp) {
+      const sortedApps = this.state.currentSpace.apps.sort((a, b) => a.name.localeCompare(b.name));
+      appSelect = (
+        <select
+          className={ this.styler('nav-breadcrumb-select', 'nav-breadcrumb-select-app') }
+          onChange={ this._handleAppSelect }
+        >
+          { templateOptions(sortedApps, this.state.currentApp.guid) }
+         </select>
+      );
+    }
 
     return (
-      <div className={ this.styler('test-nav-primary') }>
-        <ul className={ mainList }>
-          <li key="overview" className={ this.styler('sidenav-entity') }>
-            <a href="/#" onClick={this._handleOverviewClick}>Overview</a>
-          </li>
-          <li key="organizations" className={ this.styler('sidenav-header') }>
-            <span className={ this.styler('sidenav-header-text') }>
-              Organizations</span>
-          </li>
-        { sortedOrgs.map((org) => {
-          let toggleSpaceHandler = this._toggleSpacesMenu.bind(this, org.guid);
-          let arrowClasses = (org.space_menu_open) ? downArrow : rightArrow;
-          let activeOrgClasses = (org.space_menu_open) ? this.styler('sidenav-active') : '';
-          let subList = <div></div>;
-          const sortedSpaces = org.spaces.sort((a, b) => a.name < b.name ? -1 : 1);
-
-          if (org.space_menu_open) {
-            subList = (
-              <ul className={ secondList }>
-                <li>
-                  <a href={ this.orgHref(org) }>{ org.name } overview</a>
-                  <ul className={ thirdList }>
-                    { sortedSpaces.map((space) => {
-                      let activeSpaceClasses = (this.isCurrentSpace(space.guid)) ?
-                          this.styler('sidenav-active') : '';
-                      return (
-                        <li key={ space.guid } className={activeSpaceClasses}>
-                          <a href={ this.spaceHref(org, space.guid) }>
-                            <span>{ space.name }</span>
-                          </a>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-                <li className={ this.styler('marketplace') }>
-                  <a href={ this.marketplaceHref(org) }>{ org.name } marketplace</a>
-                </li>
-              </ul>
-            );
-          }
-
-          return (
-            <li key={ org.guid } className={ activeOrgClasses }>
-              <a href="#" onClick={ toggleSpaceHandler } >
-                <span>{ org.name }</span>
-                <span className={ arrowClasses }></span>
-              </a>
-              { subList }
-            </li>
-          );
-        })}
-        </ul>
+      <div className={ this.styler('nav-breadcrumb') }>
+        { orgSelect }
+        { spaceSelect }
+        { appSelect }
       </div>
     );
   }

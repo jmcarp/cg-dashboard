@@ -22,6 +22,16 @@ class OrgStore extends BaseStore {
 
   _registerToActions(action) {
     switch (action.type) {
+      case orgActionTypes.ORG_CHANGE_CURRENT: {
+        const changed = this._currentOrgGuid !== action.orgGuid;
+        this._currentOrgGuid = action.orgGuid;
+        if (changed) {
+          this.emitChange();
+        }
+
+        break;
+      }
+
       case orgActionTypes.ORG_FETCH: {
         cfApi.fetchOrg(action.orgGuid);
         this.fetching = true;
@@ -68,12 +78,7 @@ class OrgStore extends BaseStore {
       }
 
       case orgActionTypes.ORGS_SUMMARIES_RECEIVED: {
-        this.mergeMany('guid', action.orgs, (changed) => {
-          if (changed) {
-            const orgUpdates = this.updateOpenOrgs(this._currentOrgGuid);
-            this.mergeMany('guid', orgUpdates, () => {});
-          }
-        });
+        this.mergeMany('guid', action.orgs);
         this.fetched = true;
         this.fetching = false;
         this.emitChange();
@@ -81,11 +86,12 @@ class OrgStore extends BaseStore {
       }
 
       case orgActionTypes.ORG_TOGGLE_SPACE_MENU: {
+        const changed = this._currentOrgGuid !== action.orgGuid;
         this._currentOrgGuid = action.orgGuid;
-        const updates = this.updateOpenOrgs(action.orgGuid);
-        this.mergeMany('guid', updates, (changed) => {
-          if (changed) this.emitChange();
-        });
+        if (changed) {
+          this.emitChange();
+        }
+
         break;
       }
 

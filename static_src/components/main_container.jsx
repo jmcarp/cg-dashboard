@@ -43,11 +43,11 @@ export default class App extends React.Component {
 
   render() {
     let content;
-    let sidebar;
+    let breadcrumbNav;
 
     if (this.state.isLoggedIn) {
       content = this.props.children;
-      sidebar = <Nav />;
+      breadcrumbNav = <Nav />;
     } else {
       content = <Login />;
     }
@@ -58,10 +58,10 @@ export default class App extends React.Component {
         <Disclaimer />
         <Header />
         <div className={ this.styler('sidenav-parent', 'main_content', 'content-dashboard') }>
-          <nav className={ this.styler('sidenav') }>
-            { sidebar }
-          </nav>
           <main className={ this.styler('sidenav-main', 'usa-content') }>
+            <nav className={ this.styler('breadcrumb-nav') }>
+              { breadcrumbNav }
+            </nav>
             <div className={ this.styler('content') }>
               { content }
             </div>

@@ -35,12 +35,21 @@ function login() {
 }
 
 function dashboard() {
+  // Reset the state
+  appActions.changeCurrentApp();
+  spaceActions.changeCurrentSpace();
+  orgActions.changeCurrentOrg();
+
   ReactDOM.render(<MainContainer>
     <Home />
   </MainContainer>, mainEl);
 }
 
 function org(orgGuid) {
+  // Reset the state
+  appActions.changeCurrentApp();
+  spaceActions.changeCurrentSpace();
+
   orgActions.toggleSpaceMenu(orgGuid);
   orgActions.fetch(orgGuid);
   ReactDOM.render(
@@ -50,6 +59,9 @@ function org(orgGuid) {
 }
 
 function space(orgGuid, spaceGuid) {
+  // Reset the state
+  appActions.changeCurrentApp();
+
   orgActions.toggleSpaceMenu(orgGuid);
   spaceActions.changeCurrentSpace(spaceGuid);
   cfApi.fetchOrg(orgGuid);
@@ -174,7 +186,7 @@ const routes = {
   }
 };
 
-const router = new Router(routes);
+export const router = new Router(routes);
 router.configure({
   before: checkAuth,
   notfound: notFound,
