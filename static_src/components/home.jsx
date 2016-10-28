@@ -3,6 +3,7 @@ import style from 'cloudgov-style/css/cloudgov-style.css';
 import React from 'react';
 
 import createStyler from '../util/create_styler';
+import OrgList from './org_list.jsx';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -17,6 +18,9 @@ export default class Home extends React.Component {
           <h1>Overview</h1>
           <p className={ this.styler('page-dek') }>The dashboard provides an overview of your organizations, spaces, and applications. For full management and deployment of applications, use the <a href="https://docs.cloud.gov/getting-started/setup/">command line interface</a>.
           </p>
+
+          <OrgList />
+
           <h3 style={ {marginBottom: '0.5rem' }}>Cheatsheet</h3>
           <div className={ this.styler('grid') }>
             <section className={ this.styler('grid-width-6') }>
