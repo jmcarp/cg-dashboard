@@ -72,19 +72,25 @@ export class Nav extends React.Component {
 
     const sortedOrgs = this.state.orgs.sort((a, b) => a.name.localeCompare(b.name));
 
-    function templateOptions(items, selected) {
-      return items.map(item => {
-        const isSelected = item.guid === selected;
-        return <option value={ item.guid } selected={ isSelected }>{ item.name }</option>;
-      });
+    function templateOptions(items) {
+      return items.map(item =>
+        (
+          <option
+            key={ item.guid }
+          >
+            { item.name }
+          </option>
+        )
+      );
     }
 
     let orgSelect = (
       <select
         className={ this.styler('nav-breadcrumb-select', 'nav-breadcrumb-select-org') }
         onChange={ this._handleOrgSelect }
+        value={ this.state.currentOrg.guid }
       >
-        { templateOptions(sortedOrgs, this.state.currentOrg.guid) }
+        { templateOptions(sortedOrgs) }
       </select>
     );
 

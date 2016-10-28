@@ -20,7 +20,6 @@ export default class OrgList extends React.Component {
     this._onChange = this._onChange.bind(this);
     this.orgLink = this.orgLink.bind(this);
     this.styler = createStyler(style);
-    this.setState(stateSetter());
   }
 
   componentDidMount() {
