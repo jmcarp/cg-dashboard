@@ -8,7 +8,7 @@ import createStyler from '../util/create_styler';
 
 function stateSetter() {
   return {
-    rows: OrgStore.getAll()
+    rows: OrgStore.getAll().sort((a, b) => a.name.localeCompare(b.name))
   };
 }
 
