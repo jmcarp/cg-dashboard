@@ -28,9 +28,6 @@ export class Nav extends React.Component {
     this.state = stateSetter();
     this.styler = createStyler(style);
     this._onChange = this._onChange.bind(this);
-    this._handleOrgSelect = this._handleOrgSelect.bind(this);
-    this._handleSpaceSelect = this._handleSpaceSelect.bind(this);
-    this._handleAppSelect = this._handleAppSelect.bind(this);
   }
 
   componentDidMount() {
@@ -45,6 +42,25 @@ export class Nav extends React.Component {
 
   _onChange() {
     this.setState(stateSetter());
+  }
+
+  _handleSelect(type, e) {
+    switch (type) {
+      case 'org': {
+        this._handleOrgSelect(e);
+        break;
+      }
+      case 'space': {
+        this._handleSpaceSelect(e);
+        break;
+      }
+      case 'app': {
+        this._handleAppSelect(e);
+        break;
+      }
+      default:
+        break;
+    }
   }
 
   _handleOrgSelect(e) {
@@ -65,66 +81,60 @@ export class Nav extends React.Component {
     router.setRoute(`/org/${orgGuid}/spaces/${spaceGuid}/apps/${appGuid}`);
   }
 
+  _templateSelect(type, value, options) {
+    const handler = this._handleSelect.bind(this, type);
+    return (
+      <div className={ this.styler('nav-breadcrumb-select-wrapper') }>
+        <div className={ this.styler('nav-breadcrumb-select', `nav-breadcrumb-select-${type}`) }>
+          <select
+            onChange={ handler }
+            value={ value }
+          >
+            { options.map(item =>
+                (
+                  <option
+                    value={ item.guid }
+                    key={ item.guid }
+                  >
+                    { item.name }
+                  </option>
+                )
+              )
+            }
+          </select>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     if (!this.state.currentOrg) {
       return null;
     }
 
     const sortedOrgs = this.state.orgs.sort((a, b) => a.name.localeCompare(b.name));
-
-    function templateOptions(items) {
-      return items.map(item =>
-        (
-          <option
-            key={ item.guid }
-          >
-            { item.name }
-          </option>
-        )
-      );
-    }
-
-    let orgSelect = (
-      <select
-        className={ this.styler('nav-breadcrumb-select', 'nav-breadcrumb-select-org') }
-        onChange={ this._handleOrgSelect }
-        value={ this.state.currentOrg.guid }
-      >
-        { templateOptions(sortedOrgs) }
-      </select>
-    );
+    let orgSelect = this._templateSelect('org', this.state.currentOrg.guid, sortedOrgs);
 
     let spaceSelect = null;
     if (!!this.state.currentSpace) {
       const sortedSpaces =
         this.state.currentOrg.spaces.sort((a, b) => a.name.localeCompare(b.name));
-      spaceSelect = (
-        <select
-          className={ this.styler('nav-breadcrumb-select', 'nav-breadcrumb-select-space') }
-          onChange={ this._handleSpaceSelect }
-        >
-          { templateOptions(sortedSpaces, this.state.currentSpace.guid) }
-         </select>
-      );
+      spaceSelect = this._templateSelect('space', this.state.currentSpace.guid, sortedSpaces);
     }
 
     let appSelect = null;
     if (!!this.state.currentApp) {
-      const sortedApps = this.state.currentSpace.apps.sort((a, b) => a.name.localeCompare(b.name));
-      appSelect = (
-        <select
-          className={ this.styler('nav-breadcrumb-select', 'nav-breadcrumb-select-app') }
-          onChange={ this._handleAppSelect }
-        >
-          { templateOptions(sortedApps, this.state.currentApp.guid) }
-         </select>
-      );
+      const sortedApps = (this.state.currentSpace.apps || [this.state.currentApp])
+        .sort((a, b) => a.name.localeCompare(b.name));
+      appSelect = this._templateSelect('app', this.state.currentApp.guid, sortedApps);
     }
 
     return (
       <div className={ this.styler('nav-breadcrumb') }>
         { orgSelect }
+        { spaceSelect && <span className={ this.styler('nav-breadcrumb-divider') }>/</span> }
         { spaceSelect }
+        { appSelect && <span className={ this.styler('nav-breadcrumb-divider') }>/</span> }
         { appSelect }
       </div>
     );
