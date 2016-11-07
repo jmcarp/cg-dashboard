@@ -84,8 +84,8 @@ export class Nav extends React.Component {
   _templateSelect(type, value, options) {
     const handler = this._handleSelect.bind(this, type);
     return (
-      <div className={ this.styler('nav-breadcrumb-select-wrapper') }>
-        <div className={ this.styler('nav-breadcrumb-select', `nav-breadcrumb-select-${type}`) }>
+      <div className={ this.styler('nav_breadcrumb-select_wrapper') }>
+        <div className={ this.styler('nav_breadcrumb-select', `nav_breadcrumb-select-${type}`) }>
           <select
             onChange={ handler }
             value={ value }
@@ -130,11 +130,11 @@ export class Nav extends React.Component {
     }
 
     return (
-      <div className={ this.styler('nav-breadcrumb') }>
+      <div className={ this.styler('nav_breadcrumb') }>
         { orgSelect }
-        { spaceSelect && <span className={ this.styler('nav-breadcrumb-divider') }>/</span> }
+        { spaceSelect && <span className={ this.styler('nav_breadcrumb-divider') }>/</span> }
         { spaceSelect }
-        { appSelect && <span className={ this.styler('nav-breadcrumb-divider') }>/</span> }
+        { appSelect && <span className={ this.styler('nav_breadcrumb-divider') }>/</span> }
         { appSelect }
       </div>
     );

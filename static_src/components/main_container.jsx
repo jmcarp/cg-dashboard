@@ -59,7 +59,7 @@ export default class App extends React.Component {
         <Header />
         <div className={ this.styler('sidenav-parent', 'main_content', 'content-dashboard') }>
           <main className={ this.styler('sidenav-main', 'usa-content') }>
-            <nav className={ this.styler('cg-grid') }>
+            <nav>
               { breadcrumbNav }
             </nav>
             <div className={ this.styler('content') }>
