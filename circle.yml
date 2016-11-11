@@ -19,7 +19,7 @@ dependencies:
     - go version
     - go get github.com/Masterminds/glide
     - glide install
-    - nvm use default
+    - nvm use node
     - npm install
   override:
     - go build
