@@ -1,10 +1,12 @@
 machine:
   environment:
     GODIST: "go1.6.linux-amd64.tar.gz"
+    GOPATH: "${HOME}/.go_workspace:/usr/local/go_workspace:${HOME}/.go_project"
     CF_API: "https://api.cloud.gov"
     CF_ORGANIZATION: "cf"
     CF_API_GC: "https://api.fr.cloud.gov"
     CF_ORGANIZATION_GC: "cloud-gov"
+    WS: "/home/ubuntu/.go_project/18F/cg-dashboard"
   post:
     - cd cg-dashboard && nvm install && nvm use && nvm alias default $(nvm current)
     - mkdir -p download
@@ -21,12 +23,13 @@ dependencies:
     - curl --output /home/ubuntu/bin/phantomjs-2.1.1 https://s3.amazonaws.com/circle-downloads/phantomjs-2.1.1
     - chmod a+x /home/ubuntu/bin/phantomjs-2.1.1
     - sudo ln -s --force /home/ubuntu/bin/phantomjs-2.1.1 /usr/local/bin/phantomjs
+    - mkdir -p $(dirname $WS) && ln -s $(pwd) $WS
     - go version
     - go get github.com/Masterminds/glide
     - glide install
     - npm install
   override:
-    - go build
+    - cd $WS && go build
     - npm run build
 test:
   pre:
@@ -49,6 +52,6 @@ deployment:
     tag: /[0-9]+(\.[0-9]+)*/
     owner: 18F
     commands:
-      - cd $WS && pip install --user ruamel.yaml
-      - cd $WS && export BUILD_INFO=build::$CIRCLE_BRANCH::$(date -u "+%Y-%m-%d-%H-%M-%S")::$CIRCLE_BUILD_NUM::$(deploy/npm-version.sh) && python deploy/vars-to-manifest.py
-      - cd $WS && chmod a+x deploy/circle_deploy.sh && deploy/circle_deploy.sh
+      - pip install --user ruamel.yaml
+      - export BUILD_INFO=build::$CIRCLE_BRANCH::$(date -u "+%Y-%m-%d-%H-%M-%S")::$CIRCLE_BUILD_NUM::$(deploy/npm-version.sh) && python deploy/vars-to-manifest.py
+      - chmod a+x deploy/circle_deploy.sh && deploy/circle_deploy.sh
