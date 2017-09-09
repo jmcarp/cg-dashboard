@@ -93,7 +93,6 @@ var ValidTokenData = map[string]interface{}{
 // EchoResponseHandler is a normal handler for responses received from the proxy requests.
 func EchoResponseHandler(rw http.ResponseWriter, response *http.Response) {
 	for header := range response.Header {
-		// fmt.Println("DEBUG GENERIC HANDLER", header, response.Header.Get(header))
 		rw.Header().Add(header, response.Header.Get(header))
 	}
 
